@@ -111,8 +111,5 @@ var viewer = (function (_base) {
         treeView.dxTreeView('instance').selectAll();
         $element.append(treeView);
     };
-    viewer.prototype.allowMultiselection = function () {
-        return this.getMasterFilterMode() == 'Multiple';
-    };
     return viewer;
 }(DevExpress.JS.Dashboard.customViewerItem));
