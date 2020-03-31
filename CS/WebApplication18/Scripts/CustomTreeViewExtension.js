@@ -5,7 +5,7 @@
         metaData: customItemExtensionMeta,
 
         createViewerItem: function (model, $element, content) {
-            return new viewer(model, $element, content);
+            return new viewer(model, $element, content, dashboardControl);
         }
     }
 };
@@ -50,9 +50,10 @@ var customItemExtensionMeta = {
 
 var viewer = (function (_base) {
     __extends(viewer, _base);
-    function viewer(model, $container, options) {
+    function viewer(model, $container, options, dashboardControl) {
         _base.call(this, model, $container, options);
         this.model = model;
+        this.dashboardControl = dashboardControl;
     }
     viewer.prototype._requiredBindingsCount = 3;
     viewer.prototype._getTreeViewId = function () {
@@ -91,12 +92,20 @@ var viewer = (function (_base) {
             selectNodesRecursive: true,
             showCheckBoxesMode: "normal",
             onSelectionChanged: function (e) {
-                _this.setMasterFilter(null);
                 var selectedNodeKeys = e.component.getSelectedNodesKeys();
-                var selectedRows = dataSource.filter(function (row) { return selectedNodeKeys.indexOf(row.ID) != -1 });
-                $.each(selectedRows, function (index, item) {
-                    _this.setMasterFilter(item._customData);
-                });
+                var selectedRows = dataSource
+                    .filter(function (row) { return selectedNodeKeys.indexOf(row.ID) != -1 })
+                    .map(function (row) {
+                        return [row._customData.getUniqueValue('dimensionsBinding')[0]]
+                    });
+                var viewerApiExtension = _this.dashboardControl.findExtension("viewer-api");
+
+                if (_this.getMasterFilterMode() == 'Multiple') {
+                    if (selectedRows.length)
+                        viewerApiExtension.setMasterFilter(_this.model.componentName(), selectedRows);
+                    else
+                        viewerApiExtension.clearMasterFilter(_this.model.componentName());
+                }
             }
         });
         treeView.dxTreeView('instance').selectAll();
