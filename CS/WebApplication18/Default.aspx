@@ -1,6 +1,6 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="WebApplication18.Default" %>
 
-<%@ Register Assembly="DevExpress.Dashboard.v17.1.Web, Version=17.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" Namespace="DevExpress.DashboardWeb" TagPrefix="dx" %>
+<%@ Register Assembly="DevExpress.Dashboard.v20.1.Web.WebForms, Version=20.1.2.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" Namespace="DevExpress.DashboardWeb" TagPrefix="dx" %>
 
 <!DOCTYPE html>
 
@@ -11,7 +11,7 @@
     <script type="text/javascript">
         function onBeforeRender(s, e) {
             var dashboardControl = s.getDashboardControl();
-            dashboardControl.registerExtension(registerCustomTreeView(dashboardControl));
+            dashboardControl.registerExtension(new CustomTreeViewExtension(dashboardControl));
         }
     </script>
 
