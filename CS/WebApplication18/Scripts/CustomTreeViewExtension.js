@@ -36,10 +36,11 @@
 		index: 110
 	};
 	
-	function Viewer(model, $container, options) {
+	function Viewer(model, $container, options, dashboardControl) {
 		Dashboard.CustomItemViewer.call(this, model, $container, options);
 		this.model = model;
 		this._requiredBindingsCount = 3;
+		this.dashboardControl = dashboardControl;
 	}
 	Viewer.prototype = Object.create(Dashboard.CustomItemViewer.prototype);
 	Viewer.prototype.constructor = Viewer;
@@ -78,10 +79,19 @@
 			selectNodesRecursive: true,
 			showCheckBoxesMode: "normal",
 			onSelectionChanged: function (e) {
-				_this.setMasterFilter(null);
 				var selectedNodeKeys = e.component.getSelectedNodesKeys();
-				var selectedRows = dataSource.filter(function (row) { return selectedNodeKeys.indexOf(row.ID) != -1 });
-				selectedRows.forEach(function(item) { _this.setMasterFilter(item._customData); });
+				var selectedRows = dataSource
+					.filter(function (row) { return selectedNodeKeys.indexOf(row.ID) != -1 })
+					.map(function (row) {
+						return [row._customData.getUniqueValue('dimensionsBinding')[0]]
+					});
+				var viewerApiExtension = _this.dashboardControl.findExtension("viewer-api");
+				if (_this.getMasterFilterMode() == 'Multiple') {
+					if (selectedRows.length)
+						viewerApiExtension.setMasterFilter(_this.model.componentName(), selectedRows);
+					else
+						viewerApiExtension.clearMasterFilter(_this.model.componentName());
+				}
 			}
 		});
 			
@@ -95,7 +105,7 @@
 		this.name = "MyTreeView";
 		this.metaData = customItemExtensionMeta;
 		this.createViewerItem = function (model, $element, content) {
-			return new Viewer(model, $element, content);
+			return new Viewer(model, $element, content, dashboardControl);
 		}
 	};
 
